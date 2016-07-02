@@ -22,7 +22,7 @@ func main() {
 	if false {
 		res.numbers = testCase1
 	} else {
-		res.numbers = readIntegers("./integers.txt")
+		res.numbers = readIntegers("./data/week1.txt")
 	}
 
 	var result = sortAndCount(res)
