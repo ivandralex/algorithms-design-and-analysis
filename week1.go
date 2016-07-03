@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
+
+	"./common"
 )
 
 //var testCase1 = []int{8, 7, 6, 5, 4, 3, 2, 1}
@@ -22,32 +21,12 @@ func main() {
 	if false {
 		res.numbers = testCase1
 	} else {
-		res.numbers = readIntegers("./data/week1.txt")
+		res.numbers = common.ReadIntegers("./data/week1.txt")
 	}
 
 	var result = sortAndCount(res)
 
 	fmt.Printf("Inversions found: %d\n", result.counter)
-}
-
-func readIntegers(path string) []int {
-	var file, err = os.Open(path)
-
-	if err != nil {
-		fmt.Println("Failed to open file")
-		os.Exit(1)
-	}
-
-	var numbers []int
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lineStr := scanner.Text()
-		num, _ := strconv.Atoi(lineStr)
-		numbers = append(numbers, num)
-	}
-
-	return numbers
 }
 
 func sortAndCount(res *Result) *Result {
