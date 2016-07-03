@@ -20,13 +20,25 @@ func main() {
 	if false {
 		res.numbers = testCase1
 	} else {
-		res.numbers = common.ReadIntegers("./data/week2.txt")
+		launch("./data/week2_10.txt")
+		launch("./data/week2_100.txt")
+		launch("./data/week2_1000.txt")
+	}
+}
+
+func launch(path string) {
+	var res = new(Result)
+
+	if false {
+		res.numbers = testCase1
+	} else {
+		res.numbers = common.ReadIntegers(path)
 	}
 
 	sortAndCount(res, 0, len(res.numbers)-1, 0)
 
-	fmt.Printf("Sorted array: %v\n", res.numbers)
-	fmt.Printf("Comparisons found: %d\n", res.counter)
+	//fmt.Printf("Sorted array: %v\n", res.numbers)
+	fmt.Printf("%s: %d\n", path, res.counter)
 }
 
 func sortAndCount(res *Result, start int, end int, level int) {
@@ -56,15 +68,15 @@ func sortAndCount(res *Result, start int, end int, level int) {
 		}
 	}
 
-	/*
-		fmt.Printf("#%d\tAfter: %v %d\n", level, res.numbers[start:end+1], res.numbers[p])
-		fmt.Printf("#%d\tTemp: %v\n", level, res.numbers)
-		if p > start {
-			fmt.Printf("#%d\tFork right: %d: %v\n", level, res.numbers[p], res.numbers[start:p])
-		}
-		if p+1 < end {
-			fmt.Printf("#%d\tFork left: %d: %v\n", level, res.numbers[p], res.numbers[p+1:end+1])
-		}
+	/* Debug logs
+	fmt.Printf("#%d\tAfter: %v %d\n", level, res.numbers[start:end+1], res.numbers[p])
+	fmt.Printf("#%d\tTemp: %v\n", level, res.numbers)
+	if p > start {
+		fmt.Printf("#%d\tFork right: %d: %v\n", level, res.numbers[p], res.numbers[start:p])
+	}
+	if p+1 < end {
+		fmt.Printf("#%d\tFork left: %d: %v\n", level, res.numbers[p], res.numbers[p+1:end+1])
+	}
 	*/
 
 	if p > start {
