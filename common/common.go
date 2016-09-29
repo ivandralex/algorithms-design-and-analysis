@@ -3,10 +3,17 @@ package common
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
+//Graph represented by adjacency list
+type Graph [][]int
+
+//ReadIntegers reads integers line by line
 func ReadIntegers(path string) []int {
 	var file, err = os.Open(path)
 
@@ -25,4 +32,44 @@ func ReadIntegers(path string) []int {
 	}
 
 	return numbers
+}
+
+//ReadAdjacencyLists reads adjency list from file
+func ReadAdjacencyLists(path string) [][]int {
+	var file, err = os.Open(path)
+
+	if err != nil {
+		fmt.Println("Failed to open file")
+		os.Exit(1)
+	}
+
+	graph := [][]int{}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		//Init new adjacency list
+		list := []int{}
+		//Read and split line
+		lineStr := scanner.Text()
+		numbers := strings.Split(lineStr, "\t")
+
+		for i := range numbers {
+			number, err := strconv.Atoi(numbers[i])
+			if err != nil {
+				continue
+			}
+
+			list = append(list, number)
+		}
+
+		graph = append(graph, list)
+	}
+
+	return graph
+}
+
+//RandomInRange generates random in range
+func RandomInRange(min, max int) int {
+	rand.Seed(time.Now().Unix())
+	return rand.Intn(max-min) + min
 }
