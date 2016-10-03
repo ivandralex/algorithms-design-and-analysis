@@ -7,17 +7,37 @@ import (
 )
 
 func main() {
-	graph := common.ReadAdjacencyLists("./data/kargerMinCut0.txt")
 
-	fmt.Printf("Initial graph:\n")
+	var minCutSize = 10000000
+
+	for i := 0; i < 2000; i++ {
+		size := getMinCutSize()
+
+		if size < minCutSize {
+			minCutSize = size
+		}
+	}
+
+	fmt.Printf("Min min cut size: %d\n", minCutSize)
+}
+
+func getMinCutSize() int {
+	graph := common.ReadAdjacencyLists("./data/kargerMinCut.txt")
+
+	//fmt.Printf("Initial graph:\n")
 	printGraph(&graph)
 
 	for len(graph) > 2 {
 		contractRandomEdge(&graph)
 	}
 
-	fmt.Printf("After contraction:\n")
+	//fmt.Printf("After contraction:\n")
 	printGraph(&graph)
+
+	var minCutSize = len(graph[0]) - 1
+	//fmt.Printf("Min cut size: %d\n", minCutSize)
+
+	return minCutSize
 }
 
 func contractRandomEdge(graph *[][]int) {
@@ -37,18 +57,25 @@ func contractRandomEdge(graph *[][]int) {
 			vertex2Index = i
 			break
 		}
-
 	}
 
 	//Replace vertex2 with vertex1 in all vertices except for vertex1
 	for i := range *graph {
 		if (*graph)[i][0] == vertex1 {
-			for j := range (*graph)[vertex2Index] {
-				if j == 0 || (*graph)[vertex2Index][j] == vertex1 {
+			for j, value := range (*graph)[vertex2Index] {
+				if j == 0 || value == vertex1 {
 					continue
 				}
-				(*graph)[vertex1Index] = append((*graph)[vertex1Index], (*graph)[vertex2Index][j])
+				(*graph)[vertex1Index] = append((*graph)[vertex1Index], value)
 			}
+
+			b := (*graph)[vertex1Index][:0]
+			for _, x := range (*graph)[vertex1Index] {
+				if x != vertex2 {
+					b = append(b, x)
+				}
+			}
+			(*graph)[vertex1Index] = b
 		} else {
 			for j := range (*graph)[i] {
 				if j == 0 {
@@ -64,12 +91,14 @@ func contractRandomEdge(graph *[][]int) {
 	//Remove vertex2
 	*graph = append((*graph)[:vertex2Index], (*graph)[vertex2Index+1:]...)
 
-	fmt.Printf("Step: %d --> %d\n", vertex2, vertex1)
+	//fmt.Printf("Step: %d --> %d\n", vertex2, vertex1)
 	printGraph(graph)
 }
 
 func printGraph(graph *[][]int) {
-	for i := range *graph {
-		fmt.Printf("%v\n", (*graph)[i])
-	}
+	/*
+		for i := range *graph {
+			fmt.Printf("%v\n", (*graph)[i])
+		}
+	*/
 }
