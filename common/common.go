@@ -10,9 +10,6 @@ import (
 	"time"
 )
 
-//Graph represented by adjacency list
-type Graph [][]int
-
 //ReadIntegers reads integers line by line
 func ReadIntegers(path string) []int {
 	var file, err = os.Open(path)
@@ -63,58 +60,6 @@ func ReadAdjacencyLists(path string) [][]int {
 		}
 
 		graph = append(graph, list)
-	}
-
-	return graph
-}
-
-//ReadEdges reads adjency list from file
-func ReadEdges(path string) [][]int {
-	var file, err = os.Open(path)
-
-	if err != nil {
-		fmt.Println("Failed to open file")
-		os.Exit(1)
-	}
-
-	verticesMap := make(map[int]map[int]bool)
-	adjancencyMap := make(map[int][]int)
-	vertices := []int{}
-
-	graph := [][]int{}
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		//Read and split line
-		lineStr := scanner.Text()
-		numbers := strings.Split(lineStr, " ")
-
-		edge := []int{}
-
-		for _, str := range numbers {
-			number, err := strconv.Atoi(str)
-			if err != nil {
-				continue
-			}
-
-			edge = append(edge, number)
-		}
-
-		//Init map
-		if _, ok := verticesMap[edge[0]]; !ok {
-			verticesMap[edge[0]] = make(map[int]bool)
-			adjancencyMap[edge[0]] = []int{edge[0]}
-			vertices = append(vertices, edge[0])
-		}
-
-		if _, ok := verticesMap[edge[0]][edge[1]]; !ok {
-			verticesMap[edge[0]][edge[1]] = true
-			adjancencyMap[edge[0]] = append(adjancencyMap[edge[0]], edge[1])
-		}
-	}
-
-	for _, v := range vertices {
-		graph = append(graph, adjancencyMap[v])
 	}
 
 	return graph
