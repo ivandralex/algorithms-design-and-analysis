@@ -20,8 +20,8 @@ func (s *stack) Pop() int {
 	return res
 }
 
-//ReadEdges reads adjency list from file
-func ReadEdges(path string) *[][]int {
+//ReadEdges reads adjency list from file and returns (adjency list, vertex index) pair
+func ReadEdges(path string) (*[][]int, *map[int]int) {
 	var file, err = os.Open(path)
 
 	if err != nil {
@@ -29,8 +29,8 @@ func ReadEdges(path string) *[][]int {
 		os.Exit(1)
 	}
 
-	verticesMap := make(map[int]map[int]bool)
-	adjancencyMap := make(map[int][]int)
+	verticesIndex := make(map[int]int)
+	adjacencyMap := make(map[int][]int)
 	vertices := []int{}
 
 	graph := [][]int{}
@@ -52,30 +52,37 @@ func ReadEdges(path string) *[][]int {
 			edge = append(edge, number)
 		}
 
-		//Init map
-		if _, ok := verticesMap[edge[0]]; !ok {
-			verticesMap[edge[0]] = make(map[int]bool)
-			adjancencyMap[edge[0]] = []int{edge[0]}
-			vertices = append(vertices, edge[0])
-		}
+		addVertex(edge[0], &verticesIndex, &adjacencyMap, &vertices)
+		addVertex(edge[1], &verticesIndex, &adjacencyMap, &vertices)
 
-		if _, ok := verticesMap[edge[0]][edge[1]]; !ok {
-			verticesMap[edge[0]][edge[1]] = true
-			adjancencyMap[edge[0]] = append(adjancencyMap[edge[0]], edge[1])
+		adjacencyMap[edge[0]] = append(adjacencyMap[edge[0]], edge[1])
+		if edge[0] != edge[1] {
+			adjacencyMap[edge[1]] = append(adjacencyMap[edge[1]], -edge[0])
 		}
 	}
 
 	for _, v := range vertices {
-		graph = append(graph, adjancencyMap[v])
+		graph = append(graph, adjacencyMap[v])
 	}
 
-	return &graph
+	return &graph, &verticesIndex
+}
+
+func addVertex(v int, verticesIndex *map[int]int, adjacencyMap *map[int][]int, vertices *[]int) {
+	//Init map for edge tail
+	if _, ok := (*verticesIndex)[v]; !ok {
+		(*verticesIndex)[v] = len(*vertices)
+		(*adjacencyMap)[v] = []int{v}
+		*vertices = append(*vertices, v)
+	}
 }
 
 func main() {
-	graph := ReadEdges("./data/SCC.txt")
+	graph, verticesIndex := ReadEdges("./data/SCC.txt")
 	fmt.Println("Finished reading edges")
-
+	fmt.Printf("vertex[1]: %v\n", (*graph)[(*verticesIndex)[1]][0:30])
+	fmt.Printf("vertex[5]: %v\n", (*graph)[(*verticesIndex)[5]][0:30])
+	fmt.Printf("vertex[6]: %v\n", (*graph)[(*verticesIndex)[6]][0:10])
 	//common.PrintGraph(graph)
 
 	//Map of explored nodes
