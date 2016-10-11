@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -91,38 +92,51 @@ func main() {
 	//Map of explored nodes
 	explored := make(map[int]bool)
 	//Array of list indices sorted by finishing times of the first pass of dfsLoop
-	finishingTimes := make(map[int]int)
-	//Number of processed nodes
-	var numProcessed int
+	finishingTimes := []int{}
 
 	//First pass on inverted graph`
-	dfsLoop(graph, indices, vertexIndexMap, -1, &explored, &finishingTimes, &numProcessed)
+	dfsLoop(graph, indices, vertexIndexMap, -1, &explored, &finishingTimes, nil)
 
 	fmt.Println("Finished inverted pass")
 
-	fmt.Printf("Finishing time of the %d vertex: %d and of the %d: %d\n", 1, finishingTimes[1], 875709, finishingTimes[875709])
-	fmt.Printf("Processed in total: %d\n", numProcessed)
-
-	//TODO: collect finishing times and rebuild vertexIndexMap
+	//Reset explored vertices
+	explored = make(map[int]bool)
+	leaders := make(map[int]int)
 
 	//Second pass on the original graph in order defined by reversed finishing times
-	//dfsLoop(graph, indices, vertexIndexMap, false, &explored, &finishingTimes, &numProcessed)
+	dfsLoop(graph, &finishingTimes, vertexIndexMap, 1, &explored, nil, &leaders)
+
+	sizes := []int{}
+
+	for _, size := range leaders {
+		sizes = append(sizes, size)
+	}
+
+	sort.Ints(sizes)
+
+	fmt.Printf("Top 5 SCCs sizes: %v\n", sizes[len(sizes)-5:])
 }
 
-func dfsLoop(graph *[][]int, indices *[]int, vertexIndexMap *map[int]int, factor int, explored *map[int]bool, finishingTimes *map[int]int, numProcessed *int) {
+func dfsLoop(graph *[][]int, indices *[]int, vertexIndexMap *map[int]int, factor int, explored *map[int]bool, finishingTimes *[]int, leaders *map[int]int) {
+	var numProcessed int
 	//Indices graph loop ordering
-	for _, index := range *indices {
+	for k := len(*indices) - 1; k >= 0; k-- {
+		index := (*indices)[k]
 		i := (*graph)[index][0]
 		//if i not yet explored
 		if _, ok := (*explored)[i]; !ok {
-			//TODO: assign s
-			fmt.Printf("Vertex %d not explored\n", i)
-			dfs(graph, vertexIndexMap, index, factor, explored, finishingTimes, numProcessed)
+			fmt.Printf("%d$ Vertex %d not explored\n", factor, i)
+			numProcessed = 0
+			dfs(graph, vertexIndexMap, index, factor, explored, finishingTimes, &numProcessed)
+			if factor == 1 {
+				//Save number of vertices in SSC with leader i
+				(*leaders)[i] = numProcessed
+			}
 		}
 	}
 }
 
-func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, explored *map[int]bool, finishingTimes *map[int]int, numProcessed *int) {
+func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, explored *map[int]bool, finishingTimes *[]int, numProcessed *int) {
 	//We are executing DFS for vertex defined by adjacency list graph[index]
 
 	//Get adjacency list
@@ -130,14 +144,14 @@ func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, exp
 	//Vertex for which we run DFS
 	i := list[0]
 
-	fmt.Printf("Started DFS on vertex %d\n", i)
+	fmt.Printf("%d$ Started DFS on vertex %d\n", factor, i)
 
 	//Mark i as explored
 	(*explored)[i] = true
 
 	//for each (i, j) from G ...
 	for _, j := range list {
-		//We don't consider edges incompatible with current direction
+		//We only follow edges in direction defined by factor
 		if j == i || (factor == -1 && j > 0) || (factor == 1 && j < 0) {
 			continue
 		}
@@ -146,11 +160,13 @@ func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, exp
 
 		//if j not yet explored
 		if _, ok := (*explored)[absJ]; !ok {
-			fmt.Printf("%d DFS recurses on vertex %d\n", i, j)
+			fmt.Printf("%d$ %d DFS recurses on vertex %d\n", factor, i, j)
 			dfs(graph, vertexIndexMap, (*vertexIndexMap)[absJ], factor, explored, finishingTimes, numProcessed)
 		}
 	}
 	(*numProcessed)++
-	(*finishingTimes)[i] = *numProcessed
-	fmt.Printf("Finished DFS on vertex %d\n", i)
+	if factor == -1 {
+		*finishingTimes = append(*finishingTimes, index)
+	}
+	fmt.Printf("%d$ Finished DFS on vertex %d\n", factor, i)
 }
