@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -101,6 +100,9 @@ func main() {
 
 	fmt.Println("Finished inverted pass")
 
+	fmt.Printf("Finishing time of the %d vertex: %d and of the %d: %d\n", 1, finishingTimes[1], 875709, finishingTimes[875709])
+	fmt.Printf("Processed in total: %d\n", numProcessed)
+
 	//TODO: collect finishing times and rebuild vertexIndexMap
 
 	//Second pass on the original graph in order defined by reversed finishing times
@@ -128,7 +130,7 @@ func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, exp
 	//Vertex for which we run DFS
 	i := list[0]
 
-	fmt.Printf("Started DFS on vertex %d (explored)\n", i)
+	fmt.Printf("Started DFS on vertex %d\n", i)
 
 	//Mark i as explored
 	(*explored)[i] = true
@@ -145,7 +147,7 @@ func dfs(graph *[][]int, vertexIndexMap *map[int]int, index int, factor int, exp
 		//if j not yet explored
 		if _, ok := (*explored)[absJ]; !ok {
 			fmt.Printf("%d DFS recurses on vertex %d\n", i, j)
-			dfs(graph, vertexIndexMap, (*vertexIndexMap)[int(math.Abs(float64(j)))], factor, explored, finishingTimes, numProcessed)
+			dfs(graph, vertexIndexMap, (*vertexIndexMap)[absJ], factor, explored, finishingTimes, numProcessed)
 		}
 	}
 	(*numProcessed)++
