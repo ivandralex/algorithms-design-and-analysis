@@ -21,7 +21,7 @@ func (s *stack) Pop() int {
 }
 
 //ReadEdges reads adjency list from file and returns (adjency list, vertex index) pair
-func ReadEdges(path string) (*[][]int, *map[int]int) {
+func ReadEdges(path string) (*[][]int, *[]int) {
 	var file, err = os.Open(path)
 
 	if err != nil {
@@ -29,7 +29,8 @@ func ReadEdges(path string) (*[][]int, *map[int]int) {
 		os.Exit(1)
 	}
 
-	verticesIndex := make(map[int]int)
+	vertexInitMap := make(map[int]bool)
+	indices := []int{}
 	adjacencyMap := make(map[int][]int)
 	vertices := []int{}
 
@@ -52,8 +53,8 @@ func ReadEdges(path string) (*[][]int, *map[int]int) {
 			edge = append(edge, number)
 		}
 
-		addVertex(edge[0], &verticesIndex, &adjacencyMap, &vertices)
-		addVertex(edge[1], &verticesIndex, &adjacencyMap, &vertices)
+		addVertex(edge[0], &indices, &vertexInitMap, &adjacencyMap, &vertices)
+		addVertex(edge[1], &indices, &vertexInitMap, &adjacencyMap, &vertices)
 
 		adjacencyMap[edge[0]] = append(adjacencyMap[edge[0]], edge[1])
 		if edge[0] != edge[1] {
@@ -65,47 +66,47 @@ func ReadEdges(path string) (*[][]int, *map[int]int) {
 		graph = append(graph, adjacencyMap[v])
 	}
 
-	return &graph, &verticesIndex
+	return &graph, &indices
 }
 
-func addVertex(v int, verticesIndex *map[int]int, adjacencyMap *map[int][]int, vertices *[]int) {
+func addVertex(v int, indices *[]int, vertexInitMap *map[int]bool, adjacencyMap *map[int][]int, vertices *[]int) {
 	//Init map for edge tail
-	if _, ok := (*verticesIndex)[v]; !ok {
-		(*verticesIndex)[v] = len(*vertices)
+	if _, ok := (*vertexInitMap)[v]; !ok {
+		//Mark vertex as initialized
+		(*vertexInitMap)[v] = true
+		//Save index to indices array
+		*indices = append(*indices, len(*vertices))
+		//Init adjacency list for vertex v
 		(*adjacencyMap)[v] = []int{v}
+		//Save key of adjaceny list
 		*vertices = append(*vertices, v)
 	}
 }
 
 func main() {
-	graph, verticesIndex := ReadEdges("./data/SCC.txt")
+	graph, indices := ReadEdges("./data/SCC.txt")
 	fmt.Println("Finished reading edges")
-	fmt.Printf("vertex[1]: %v\n", (*graph)[(*verticesIndex)[1]][0:30])
-	fmt.Printf("vertex[5]: %v\n", (*graph)[(*verticesIndex)[5]][0:30])
-	fmt.Printf("vertex[6]: %v\n", (*graph)[(*verticesIndex)[6]][0:10])
-	//common.PrintGraph(graph)
 
 	//Map of explored nodes
 	explored := make(map[int]bool)
-	//Finishing times
-	finishingTimes := make(map[int]int)
+	//Array of list indices sorted by finishing times of the first pass of dfsLoop
+	finishingTimes := []int{}
 	//Number of processed nodes
 	var numProcessed int
 
 	//First pass on inverted graph
-	dfsLoop(graph, true, &explored, &finishingTimes, &numProcessed)
+	dfsLoop(graph, indices, -1, &explored, &finishingTimes, &numProcessed)
 
 	//TODO: collect finishing times
 
 	//Second pass on the original graph
-	dfsLoop(graph, false, &explored, &finishingTimes, &numProcessed)
-
-	//common.PrintGraph(&graph)
+	dfsLoop(graph, indices, 1, &explored, &finishingTimes, &numProcessed)
 }
 
-func dfsLoop(graph *[][]int, inverted bool, explored *map[int]bool, finishingTimes *map[int]int, numProcessed *int) {
-	for index, list := range *graph {
-		i := list[0]
+func dfsLoop(graph *[][]int, indices *[]int, factor int, explored *map[int]bool, finishingTimes *[]int, numProcessed *int) {
+	//Indices graph loop ordering
+	for _, index := range *indices {
+		i := (*graph)[index][0]
 		//if i not yet explored
 		if _, ok := (*explored)[i]; !ok {
 			//TODO: assign s
@@ -114,7 +115,7 @@ func dfsLoop(graph *[][]int, inverted bool, explored *map[int]bool, finishingTim
 	}
 }
 
-func dfs(graph *[][]int, index int, explored *map[int]bool, finishingTimes *map[int]int, numProcessed *int) {
+func dfs(graph *[][]int, index int, explored *map[int]bool, finishingTimes *[]int, numProcessed *int) {
 	//Restore list from dfsLoop
 	list := (*graph)[index]
 	i := list[0]
