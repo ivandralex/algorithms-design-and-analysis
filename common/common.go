@@ -77,3 +77,66 @@ func PrintGraph(graph *[][]int) {
 		fmt.Printf("%v\n", (*graph)[i])
 	}
 }
+
+//SortResult of inversions counter procedure
+type SortResult struct {
+	Numbers []int
+	Counter int
+}
+
+//SortAndCount sorts and counts inversed pairs
+func SortAndCount(res *SortResult) *SortResult {
+	var length = len(res.Numbers)
+
+	if length < 2 {
+		return res
+	}
+
+	var leftRes = new(SortResult)
+	leftRes.Numbers = res.Numbers[0 : length/2]
+
+	var rightRes = new(SortResult)
+	rightRes.Numbers = res.Numbers[length/2:]
+
+	//Find inversions in left-half subarray
+	leftRes = SortAndCount(leftRes)
+	//Find inversions in right-half subarray
+	rightRes = SortAndCount(rightRes)
+	//Find split inversions for which inverted numbers belong to different subarrays
+	var merged = countSplitAndMerge(leftRes, rightRes)
+
+	return merged
+}
+
+func countSplitAndMerge(left *SortResult, right *SortResult) *SortResult {
+	var merged = new(SortResult)
+
+	//fmt.Printf("Merging %v and %v\n", *left, *right)
+
+	merged.Counter = left.Counter
+	merged.Counter += right.Counter
+
+	var i int
+	var j int
+
+	//Let's piggyback on merge sort's merge subroutine
+	for i < len(left.Numbers) || j < len(right.Numbers) {
+		if (i < len(left.Numbers) && j < len(right.Numbers) && left.Numbers[i] < right.Numbers[j]) || j == len(right.Numbers) {
+			merged.Numbers = append(merged.Numbers, left.Numbers[i])
+			i++
+		} else {
+			merged.Numbers = append(merged.Numbers, right.Numbers[j])
+			j++
+
+			//If we read from right subarray before reached the end of the left
+			//Then we have inversions formed by current right number and all remaining left numbers
+			if i < len(left.Numbers) {
+				merged.Counter += len(left.Numbers) - i
+			}
+		}
+	}
+
+	//fmt.Printf("Merged to %v\n", *merged)
+
+	return merged
+}
