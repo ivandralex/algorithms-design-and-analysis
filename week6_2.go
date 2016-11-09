@@ -10,8 +10,8 @@ import (
 
 func main() {
 	var numbers []int
-	if false {
-		numbers = common.ReadIntegers("./data/median.txt")
+	if true {
+		numbers = common.ReadIntegers("data/median.txt")
 	} else {
 		numbers = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	}
@@ -19,28 +19,21 @@ func main() {
 	//MinHeap
 	hMin := &structures.MinHeap{}
 	heap.Init(hMin)
-	/*
-		heap.Push(hMin, 3)
-		fmt.Printf("minimum: %d\n", (*hMin)[0])
-		for hMin.Len() > 0 {
-			fmt.Printf("%d\n", heap.Pop(hMin))
-		}
-	*/
 
 	hMax := &structures.MaxHeap{}
 	heap.Init(hMax)
-	/*
-		heap.Push(hMax, 3)
-		fmt.Printf("maximum: %d\n", (*hMax)[0])
-		for hMax.Len() > 0 {
-			fmt.Printf("%d\n", heap.Pop(hMax))
-		}
-	*/
+
+	var median int
+
+	total := 0
 
 	for _, n := range numbers {
-		median := maintainMedian(n, hMin, hMax)
-		fmt.Printf("%v %v => %d\n", (*hMax), (*hMin), median)
+		median = maintainMedian(n, hMin, hMax)
+		total += median
+		//fmt.Printf("%v %v => %d\n", (*hMax), (*hMin), median)
 	}
+
+	fmt.Printf("Modulo: %d\n", total%10000)
 }
 
 /*
@@ -81,10 +74,10 @@ func maintainMedian(n int, hMin *structures.MinHeap, hMax *structures.MaxHeap) i
 
 	var median int
 
-	if hMin.Len() >= hMax.Len() {
-		median = (*hMin)[0]
-	} else {
+	if hMax.Len() >= hMin.Len() {
 		median = (*hMax)[0]
+	} else {
+		median = (*hMin)[0]
 	}
 
 	return median
