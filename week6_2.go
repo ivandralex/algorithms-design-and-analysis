@@ -9,46 +9,19 @@ import (
 
 func main() {
 	//MinHeap
-	h := &structures.MinHeap{2, 1, 5}
-	heap.Init(h)
-	heap.Push(h, 3)
-	fmt.Printf("minimum: %d\n", (*h)[0])
-	for h.Len() > 0 {
-		fmt.Printf("%d ", heap.Pop(h))
+	hMin := &structures.MinHeap{2, 1, 5}
+	heap.Init(hMin)
+	heap.Push(hMin, 3)
+	fmt.Printf("minimum: %d\n", (*hMin)[0])
+	for hMin.Len() > 0 {
+		fmt.Printf("%d\n", heap.Pop(hMin))
 	}
 
-	/*
-		//MaxHeap
-		// Some items and their priorities.
-		items := map[string]int{
-			"banana": 3, "apple": 2, "pear": 4,
-		}
-			// Create a priority queue, put the items in it, and
-			// establish the priority queue (heap) invariants.
-			pq := make(structures.MaxHeap, len(items))
-			i := 0
-			for value, priority := range items {
-				pq[i] = &structures.Item{
-					value:    value,
-					priority: priority,
-					index:    i,
-				}
-				i++
-			}
-			heap.Init(&pq)
-
-			// Insert a new item and then modify its priority.
-			item := &Item{
-				value:    "orange",
-				priority: 1,
-			}
-			heap.Push(&pq, item)
-			pq.update(item, item.value, 5)
-
-			// Take the items out; they arrive in decreasing priority order.
-			for pq.Len() > 0 {
-				item := heap.Pop(&pq).(*Item)
-				fmt.Printf("%.2d:%s ", item.priority, item.value)
-			}
-	*/
+	hMax := &structures.MaxHeap{2, 1, 5}
+	heap.Init(hMax)
+	heap.Push(hMax, 3)
+	fmt.Printf("maximum: %d\n", (*hMax)[0])
+	for hMax.Len() > 0 {
+		fmt.Printf("%d\n", heap.Pop(hMax))
+	}
 }
