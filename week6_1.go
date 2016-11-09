@@ -7,44 +7,48 @@ import (
 )
 
 func main() {
-	var res = new(common.SortResult)
+	numbers := common.ReadIntegers("./data/2sum.txt")
 
-	res.Numbers = common.ReadIntegers("./data/2sum.txt")
-
-	fmt.Printf("Total numbers: %d\n", len(res.Numbers))
+	fmt.Printf("Total numbers: %d\n", len(numbers))
 
 	hashMap := make(map[int]bool)
 
 	//Fill in hashMap
-	for _, i := range res.Numbers {
+	for _, i := range numbers {
 		hashMap[i] = true
 	}
 
 	fmt.Printf("Built hash\n")
 
-	targetPairs := 0
-	processed := 0
+	targetPairs := make(chan int, 20001)
 
 	for t := -10000; t < 10001; t++ {
-		for _, x := range res.Numbers {
-			y := t - x
+		go checkT(t, &hashMap, &numbers, targetPairs)
+	}
 
-			if y == x {
-				fmt.Printf("Continue: %d\n", x)
-				continue
-			}
+	sum := 0
+	cloe(targetPairs)
 
-			if _, ok := hashMap[y]; ok {
-				targetPairs++
-				break
-			}
+	for ok := range targetPairs {
+		sum += ok
+	}
+
+	fmt.Printf("Target pairs: %d\n", sum)
+}
+
+func checkT(t int, hashMap *map[int]bool, numbers *[]int, c chan int) {
+	for _, x := range *numbers {
+		y := t - x
+
+		if y == x {
+			continue
 		}
-		processed++
 
-		if processed%1000 == 0 {
-			fmt.Printf("Processed so far: %d\n", processed)
+		if _, ok := (*hashMap)[y]; ok {
+			c <- 1
+			return
 		}
 	}
 
-	fmt.Printf("Target pairs: %d\n", targetPairs)
+	c <- 0
 }
