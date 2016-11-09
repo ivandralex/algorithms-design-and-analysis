@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var numbers []int
-	if false {
+	if true {
 		numbers = common.ReadIntegers("data/median.txt")
 	} else {
 		numbers = []int{1, 12, 3, 14, 5, 16, 7, 18, 9, 10}
@@ -30,33 +30,26 @@ func main() {
 	for _, n := range numbers {
 		median = maintainMedian(n, hMin, hMax)
 		total += median
-		fmt.Printf("%d: %v %v => %d\n", n, (*hMax), (*hMin), median)
+		//fmt.Printf("%d: %v %v => %d\n", n, (*hMax), (*hMin), median)
 	}
 
 	fmt.Printf("Modulo: %d\n", total%10000)
 }
 
 /*
-[ hMax hMin]
+[ hMax (median) hMin]
 
 */
 func maintainMedian(n int, hMin *structures.MinHeap, hMax *structures.MaxHeap) int {
 	min := 0
-	max := 0
 	if hMin.Len() > 0 {
 		min = (*hMin)[0]
-	}
-	if hMax.Len() > 0 {
-		max = (*hMax)[0]
 	}
 
 	//If it lies in higher end
 	if n > min {
 		heap.Push(hMin, n)
-	}
-
-	//If it lies in lower end
-	if n < max {
+	} else {
 		heap.Push(hMax, n)
 	}
 
